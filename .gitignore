@@ -5,6 +5,10 @@
 *.tfstate
 *.tfstate.*
 
+# zip files
+*.zip
+*.tar.gz
+
 # tf lock files
 *.lock.hcl
 
@@ -30,3 +34,10 @@ override.tf.json
 
 # Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
 # example: *tfplan*
+
+# python junk
+*.pyc
+venv
+
+# credentials json
+*.json
