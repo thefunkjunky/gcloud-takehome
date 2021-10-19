@@ -10,6 +10,7 @@ if gsutil ls gs://$BUCKET; then
 else
   cp config.tf.old config.tf
   terraform init -force-copy
+  terraform apply -target=google_project.helloworld -lock=false -auto-approve
   terraform apply -target=google_storage_bucket.tfstate -lock=false -auto-approve
   cp config.tf.new config.tf
   terraform init -force-copy

@@ -9,32 +9,77 @@ data "archive_file" "gae_zip" {
   source_dir = "app/"
 }
 
-resource "google_storage_bucket_object" "helloworld" {
+resource "google_storage_bucket_object" "helloworld_zip" {
   name   = local.object_name
   source = local.object_name
   bucket = google_storage_bucket.gae-helloworld.name
 }
 
 resource "google_app_engine_application" "helloworld" {
-  project     = var.project_id
+  project     = local.project_id
   location_id = var.region
   database_type = "CLOUD_FIRESTORE"
 }
 
+resource "google_project_service" "compute" {
+  project = local.project_id
+  service = "compute.googleapis.com"
 
-resource "google_app_engine_standard_app_version" "helloworld" {
+  disable_dependent_services = false
+}
+resource "google_project_service" "debugger" {
+  project = local.project_id
+  service = "clouddebugger.googleapis.com"
+
+  disable_dependent_services = false
+}
+resource "google_project_service" "appengine_api" {
+  project = local.project_id
+  service = "appengine.googleapis.com"
+
+  disable_dependent_services = true
+}
+
+resource "google_project_service" "cloud_resource_manager" {
+  project = local.project_id
+  service = "cloudresourcemanager.googleapis.com"
+
+  disable_dependent_services = true
+}
+
+resource "google_project_service" "appengine_flex" {
+  project = local.project_id
+  service = "appengineflex.googleapis.com"
+
+  disable_dependent_services = false
+}
+
+resource "google_project_service" "storage" {
+  project = local.project_id
+  service = "storage.googleapis.com"
+
+  disable_dependent_services = false
+}
+
+resource "google_project_iam_member" "gae_api" {
+  project = local.project_id
+  role    = "roles/compute.networkUser"
+  member  = "serviceAccount:service-${local.project_num}@gae-api-prod.google.com.iam.gserviceaccount.com"
+}
+
+resource "google_app_engine_standard_app_version" "notflex" {
     delete_service_on_destroy = false
     inbound_services          = []
     instance_class            = "F1"
     noop_on_destroy           = false
-    project                   = "idme-takehome"
+    project                   = local.project_id
     runtime                   = "python39"
-    service                   = "default"
-    version_id                = "20211018t192415"
+    service                   = var.service
+    version_id                = "v2"
 
     deployment {
       zip {
-        source_url = "https://storage.googleapis.com/${google_storage_bucket.gae-helloworld.name}/${google_storage_bucket_object.helloworld.name}"
+        source_url = "https://storage.googleapis.com/${google_storage_bucket.gae-helloworld.name}/${google_storage_bucket_object.helloworld_zip.name}"
       }
   }
 
@@ -77,5 +122,76 @@ resource "google_app_engine_standard_app_version" "helloworld" {
     timeouts {}
 }
 
+resource "google_app_engine_flexible_app_version" "helloworld-flexible-default" {
+  project    = local.project_id
+  service    = "default"
+  version_id = "v1"
+  runtime    = var.runtime
 
+  # entrypoint {
+  #   shell = "gunicorn -b :$PORT main:app"
+  # }
 
+  deployment {
+    zip {
+      source_url = "https://storage.googleapis.com/${google_storage_bucket.gae-helloworld.name}/${google_storage_bucket_object.helloworld_zip.name}"
+    }
+    cloud_build_options {
+      app_yaml_path = "app.yaml"
+    }
+  }
+
+  liveness_check {
+    path = "/"
+  }
+
+  readiness_check {
+    path = "/"
+  }
+
+  automatic_scaling {
+    cool_down_period = "120s"
+    cpu_utilization {
+      target_utilization = 0.5
+    }
+  }
+
+  delete_service_on_destroy = false
+}
+
+# resource "google_app_engine_flexible_app_version" "helloworld-flexible-notdefault" {
+#   project    = local.project_id
+#   service    = var.service
+#   version_id = "v1"
+#   runtime    = var.runtime
+
+#   # entrypoint {
+#   #   shell = "gunicorn -b :$PORT main:app"
+#   # }
+
+#   deployment {
+#     zip {
+#       source_url = "https://storage.googleapis.com/${google_storage_bucket.gae-helloworld.name}/${google_storage_bucket_object.helloworld_zip.name}"
+#     }
+#     cloud_build_options {
+#       app_yaml_path = "app.yaml"
+#     }
+#   }
+
+#   liveness_check {
+#     path = "/"
+#   }
+
+#   readiness_check {
+#     path = "/"
+#   }
+
+#   automatic_scaling {
+#     cool_down_period = "120s"
+#     cpu_utilization {
+#       target_utilization = 0.5
+#     }
+#   }
+
+#   delete_service_on_destroy = true
+# }

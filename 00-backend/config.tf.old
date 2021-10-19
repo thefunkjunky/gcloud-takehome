@@ -9,7 +9,7 @@ terraform {
   
   # backend "gcs" {
   #   # bucket = "${var.project_id}-tfstate"
-  #   bucket = "idme-takehome-tfstate"
+  #   bucket = "idme-take-home-tfstate"
   #   prefix = "terraform/state"
   # }
 }
@@ -21,6 +21,11 @@ variable "project_id" {
 variable "region" {
   description = "region"
 }
+
+variable "org_id" {
+  description = "org_id"
+}
+
 
 provider "google" {
   project = var.project_id

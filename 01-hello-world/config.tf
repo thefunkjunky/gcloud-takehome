@@ -9,7 +9,7 @@ terraform {
   
   backend "gcs" {
     # bucket = "${var.project_id}-tfstate"
-    bucket = "idme-takehome-tfstate"
+    bucket = "idme-take-home-tfstate"
     prefix = "backend/helloworld/terraform.tfstate"
   }
 }
@@ -21,6 +21,11 @@ data "terraform_remote_state" "common" {
     bucket  = "${var.project_id}-tfstate"
     prefix  = "backend/terraform.tfstate"
   }
+}
+
+locals {
+  project_id = data.terraform_remote_state.common.outputs.project.project_id
+  project_num = data.terraform_remote_state.common.outputs.project.number
 }
 
 variable "project_id" {
@@ -51,7 +56,7 @@ variable "credentials" {
 }
 
 provider "google" {
-  credentials = file(var.credentials)
+  # credentials = file(var.credentials)
   project = var.project_id
   region  = var.region
 }
