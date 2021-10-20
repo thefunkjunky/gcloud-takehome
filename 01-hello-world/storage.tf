@@ -1,6 +1,7 @@
 resource "google_storage_bucket" "gae-helloworld" {
   name          = "${var.project_id}-${var.bucket_name}"
   location      = "US"
+  force_destroy = true
 
   versioning {
     enabled = true
