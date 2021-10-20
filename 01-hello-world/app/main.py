@@ -1,4 +1,4 @@
-# Copyright 2018 Google LLC
+
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -47,8 +47,6 @@ def hello():
     message = db_message("Hello World!")
     html = f"<h>message:</h<><p>{message}"
     return html
-
-    
 
 
 if __name__ == '__main__':

@@ -21,52 +21,6 @@ resource "google_app_engine_application" "helloworld" {
   database_type = "CLOUD_FIRESTORE"
 }
 
-resource "google_project_service" "compute" {
-  project = local.project_id
-  service = "compute.googleapis.com"
-
-  disable_dependent_services = false
-}
-resource "google_project_service" "debugger" {
-  project = local.project_id
-  service = "clouddebugger.googleapis.com"
-
-  disable_dependent_services = false
-}
-resource "google_project_service" "appengine_api" {
-  project = local.project_id
-  service = "appengine.googleapis.com"
-
-  disable_dependent_services = true
-}
-
-resource "google_project_service" "cloud_resource_manager" {
-  project = local.project_id
-  service = "cloudresourcemanager.googleapis.com"
-
-  disable_dependent_services = true
-}
-
-resource "google_project_service" "appengine_flex" {
-  project = local.project_id
-  service = "appengineflex.googleapis.com"
-
-  disable_dependent_services = false
-}
-
-resource "google_project_service" "datastore" {
-  project = local.project_id
-  service = "datastore.googleapis.com"
-
-  disable_dependent_services = false
-}
-
-resource "google_project_service" "storage" {
-  project = local.project_id
-  service = "storage.googleapis.com"
-
-  disable_dependent_services = false
-}
 
 resource "google_project_iam_member" "gae_api" {
   project = local.project_id
@@ -87,6 +41,11 @@ resource "google_app_engine_standard_app_version" "notflex" {
     entrypoint {
     shell = "gunicorn -b :$PORT main:app"
   }
+  env_variables = {
+    port = "8080",
+    PORT = "8080"
+  }
+
 
     deployment {
       zip {
