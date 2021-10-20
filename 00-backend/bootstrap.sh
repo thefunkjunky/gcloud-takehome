@@ -10,7 +10,8 @@ if gsutil ls gs://$BUCKET; then
   terraform init
   terraform apply -auto-approve
 else
-  echo $PROJECT/$BUCKET
+  rm -f config.tf
+  rm -f config-local.tf
   sed '/^  backend "gcs" {$/,/^  }/d' config.template > config-local.tf
   terraform init -force-copy
   terraform apply -target=google_project.helloworld -lock=false -auto-approve

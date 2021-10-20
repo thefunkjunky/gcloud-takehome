@@ -3,7 +3,7 @@ locals {
     "clouddebugger.googleapis.com",
     "appengine.googleapis.com",
     "cloudresourcemanager.googleapis.com",
-    "datastore.googleapis.com",
+    "firestore.googleapis.com",
     "storage.googleapis.com"
   ]
 }

@@ -8,7 +8,7 @@ terraform {
   required_version = "~> 1.0"
   
   backend "gcs" {
-    bucket = "idme-takehome001-tfstate"
+    bucket = "$STATE_BUCKET"
     prefix = "backend/helloworld/terraform.tfstate"
   }
 }
@@ -17,12 +17,12 @@ terraform {
 data "terraform_remote_state" "common" {
   backend = "gcs"
   config = {
-    bucket  = "idme-takehome001-tfstate"
+    bucket  = "$PROJECT-tfstate"
     prefix  = "backend/terraform.tfstate"
   }
 }
 
 provider "google" {
-  project = "idme-takehome001"
+  project = "$PROJECT"
   region  = var.region
 }

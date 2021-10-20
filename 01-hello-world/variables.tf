@@ -1,10 +1,8 @@
 locals {
   project_id = data.terraform_remote_state.common.outputs.project.project_id
   project_num = data.terraform_remote_state.common.outputs.project.number
-}
+  app_zip = "gae-helloworld-${var.version_id}.zip"
 
-variable "project_id" {
-  description = "project id"
 }
 
 variable "region" {
@@ -27,3 +25,6 @@ variable "service" {
   description = "service name"
 }
 
+variable "instance_class" {
+  description = "app engine instance_class"
+}

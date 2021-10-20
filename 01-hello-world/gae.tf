@@ -1,17 +1,14 @@
-locals {
-  object_name = "gae-helloworld-${var.version_id}.zip"
-}
 
 data "archive_file" "gae_zip" {
   type        = "zip"
-  output_path = local.object_name
+  output_path = local.app_zip
 
   source_dir = "app/"
 }
 
 resource "google_storage_bucket_object" "helloworld_zip" {
-  name   = local.object_name
-  source = local.object_name
+  name   = local.app_zip
+  source = local.app_zip
   bucket = google_storage_bucket.gae-helloworld.name
 }
 
@@ -21,147 +18,56 @@ resource "google_app_engine_application" "helloworld" {
   database_type = "CLOUD_FIRESTORE"
 }
 
-
-resource "google_project_iam_member" "gae_api" {
-  project = local.project_id
-  role    = "roles/compute.networkUser"
-  member  = "serviceAccount:service-${local.project_num}@gae-api-prod.google.com.iam.gserviceaccount.com"
-}
-
-resource "google_app_engine_standard_app_version" "notflex" {
+resource "google_app_engine_standard_app_version" "default" {
     delete_service_on_destroy = false
     inbound_services          = []
-    instance_class            = "F1"
+    instance_class            = var.instance_class
     # noop_on_destroy           = false
     project                   = local.project_id
-    runtime                   = "python39"
-    service                   = var.service
-    version_id                = "v2"
+    runtime                   = var.runtime
+    service                   = "default"
 
     entrypoint {
     shell = "gunicorn -b :$PORT main:app"
   }
+  
   env_variables = {
-    port = "8080",
     PORT = "8080"
   }
 
 
-    deployment {
-      zip {
-        source_url = "https://storage.googleapis.com/${google_storage_bucket.gae-helloworld.name}/${google_storage_bucket_object.helloworld_zip.name}"
-      }
+  deployment {
+    zip {
+      source_url = "https://storage.googleapis.com/${google_storage_bucket.gae-helloworld.name}/${google_storage_bucket_object.helloworld_zip.name}"
+    }
   }
-
-    # handlers {
-    #     auth_fail_action = "AUTH_FAIL_ACTION_REDIRECT"
-    #     login            = "LOGIN_OPTIONAL"
-    #     security_level   = "SECURE_OPTIONAL"
-    #     url_regex        = "/static/(.*)"
-
-    #     static_files {
-    #         application_readable  = false
-    #         expiration            = "0s"
-    #         http_headers          = {}
-    #         path                  = "static/\\1"
-    #         require_matching_file = false
-    #         upload_path_regex     = "static/.*"
-    #     }
-    # }
-    # handlers {
-    #     auth_fail_action = "AUTH_FAIL_ACTION_REDIRECT"
-    #     login            = "LOGIN_OPTIONAL"
-    #     security_level   = "SECURE_OPTIONAL"
-    #     url_regex        = "/.*"
-
-    #     script {
-    #         script_path = "auto"
-    #     }
-    # }
-    # handlers {
-    #     auth_fail_action = "AUTH_FAIL_ACTION_REDIRECT"
-    #     login            = "LOGIN_OPTIONAL"
-    #     security_level   = "SECURE_OPTIONAL"
-    #     url_regex        = ".*"
-
-    #     script {
-    #         script_path = "auto"
-    #     }
-    # }
-
-    # timeouts {}
 }
 
-# resource "google_app_engine_flexible_app_version" "helloworld-flexible-default" {
-#   project    = local.project_id
-#   service    = "default"
-#   version_id = "v1"
-#   runtime    = var.runtime
+resource "google_app_engine_standard_app_version" "helloworld" {
+    delete_service_on_destroy = false
+    inbound_services          = []
+    instance_class            = var.instance_class
+    # noop_on_destroy           = false
+    project                   = local.project_id
+    runtime                   = var.runtime
+    service                   = var.service
+    version_id                = var.version_id
 
-#   # entrypoint {
-#   #   shell = "gunicorn -b :$PORT main:app"
-#   # }
+    entrypoint {
+    shell = "gunicorn -b :$PORT main:app"
+  }
 
-#   deployment {
-#     zip {
-#       source_url = "https://storage.googleapis.com/${google_storage_bucket.gae-helloworld.name}/${google_storage_bucket_object.helloworld_zip.name}"
-#     }
-#     cloud_build_options {
-#       app_yaml_path = "app.yaml"
-#     }
-#   }
+    env_variables = {
+      PORT = "8080"
+    }
 
-#   liveness_check {
-#     path = "/"
-#   }
+  depends_on = [
+    google_app_engine_standard_app_version.default
+  ]
 
-#   readiness_check {
-#     path = "/"
-#   }
-
-#   automatic_scaling {
-#     cool_down_period = "120s"
-#     cpu_utilization {
-#       target_utilization = 0.5
-#     }
-#   }
-
-#   delete_service_on_destroy = false
-# }
-
-# resource "google_app_engine_flexible_app_version" "helloworld-flexible-notdefault" {
-#   project    = local.project_id
-#   service    = var.service
-#   version_id = "v1"
-#   runtime    = var.runtime
-
-#   # entrypoint {
-#   #   shell = "gunicorn -b :$PORT main:app"
-#   # }
-
-#   deployment {
-#     zip {
-#       source_url = "https://storage.googleapis.com/${google_storage_bucket.gae-helloworld.name}/${google_storage_bucket_object.helloworld_zip.name}"
-#     }
-#     cloud_build_options {
-#       app_yaml_path = "app.yaml"
-#     }
-#   }
-
-#   liveness_check {
-#     path = "/"
-#   }
-
-#   readiness_check {
-#     path = "/"
-#   }
-
-#   automatic_scaling {
-#     cool_down_period = "120s"
-#     cpu_utilization {
-#       target_utilization = 0.5
-#     }
-#   }
-
-#   delete_service_on_destroy = true
-# }
+  deployment {
+    zip {
+      source_url = "https://storage.googleapis.com/${google_storage_bucket.gae-helloworld.name}/${google_storage_bucket_object.helloworld_zip.name}"
+    }
+  }
+}
