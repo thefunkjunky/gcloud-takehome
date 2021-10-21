@@ -55,8 +55,47 @@ First thing's first, I need to create a state backend for the Terraform, and cre
 
 This was my first time using Terraform with GCP, and there were some challenges here. Notably, there's a chicken and egg problem when using a GCS state backend.  The Terraform needs to create the project the bucket will reside in first, without using backend state. Then the user needs to set their gcloud project to the new project, authenticate using their default application credentials, create the state bucket, then update the config to use the backend bucket, and export the local state to the remote backend.  I attempted to write a `bootstrap.sh` script to handle all of this.
 
-First set the variables in `terraform.tfvars`, and double check to make sure your org ID and billing account name are correct.  Then, execute `bootstrap.sh`. Part of it will require you to authenticate your Google account, please do so.  If you run into errors and need to start over, you may need to delete any remaining `*.tfstate*` files and the `.terraform` directory first.
+First set the variables in `terraform.tfvars`, and double check to make sure your org ID and billing account name are correct.  Then, execute `bootstrap.sh`. Part of it will require you to authenticate your Google account, please do so.
+
+If you run into errors and need to start over, you will need to delete any remaining `*.tfstate*` files and the `.terraform` directory first.
 
 Ensure that it runs successfully and outputs the `project` resource.  This is required for the other Terraform resources.  They will also use the project_id set here, so you won't have to change it in multiple places.
 
-## Problems
+### The GAE Application
+
+Before we get into the terraform for the application, we need to write the application itself.  The code for the Python application is located in `01-hello-world/app`.  It is a simple Flask app that uses gunicorn WSGI for the http service/entrypoint. It checks Firestore to see if the greeting data is present, and if not, it writes the "Hello World!" message to the database, and attempts to read from it again.  Once present, it will display the contents of the greeting entity in the database on a simple webpage.  I confirmed that this worked locally before moving on to GAE. After confirming that it worked with GAE using the command-line instructions provided in the docs, I started a new project and attempted to implement this using terraform.  Then all of the problems started to happen.
+
+
+
+### Terraform/GAE Problems
+
+Although there are terraform resources available for managing GAE and deploying the application code to new services/versions, in practice it doesn't work very well.
+
+To start, there are rules for GAE that aren't conducive to Terraform IaC.  Namely, there can only be one `google_app_engine_application` per project, and once created, it cannot be deleted (you have to delete the entire project). Second, no service can be created without first deploying the `default` service, which also can't be deleted. Third, the oldest version for each service also can't be removed, which terraform will try to do if certain changes are made to the version resource.
+
+I tried to get around this by creating a separate resource for the default service, and another resource for a user-managed `helloworld` service, which depends on the `default` service being created first.  In theory this should work, but I experienced a host of different issues and errors when running it for the first time.  Many of the API errors aren't clear about what the problem is, and I eventually figured out that the real error messages are hidden in Cloud Build and Cloud Logging for the "behind the scenes" build and deployment steps.
+
+Furthermore, most of the issues appear to either be transient in nature and go away on subsequent runs of the terraform code, or require that the app be deployed once using the gcloud command line tool to "set up" whatever needs to be initialized on the backend.
+
+If you see errors when applying the terraform here, waiting 5-10 minutes after creation of the `google_app_engine_application.helloworld` resource and running:
+```bash
+gcloud app deploy --version init
+```
+in the `app` directory seems to fix many of the transient issues, and subsequent runs of the terraform will work.  Not ideal, but I'm at the point where I would be reaching out to GCloud support to better understand what the problem is, or potentially abandoning this approach and starting over with GKE, or something else more simple and direct.
+
+There's probably a way to make this work in one go using terraform, but I'm afraid I might burn through a lot more time that I could have used to just do something different.  I was advised not to start over, so I'm presenting the project as-is, with the hope that we can discuss these issues in person. 
+
+## Monitoring
+The good news is that once the app has been deployed, a world of monitoring metrics are ready to go.  They can be viewed in the Cloud Monitoring tool, and provide access to common metrics like CPU and Memory usage (good for spotting load or memory leaks), but also other really useful metrics like http response codes, and request latency, which is probably the most useful of the bunch.
+
+There is also Cloud Trace, which tracks requests through the application and measures the latency at each hop and service, which helps identify bottlenecks.  There is cloud debugging for debugging purposes, and you can also set up memcache to reduce load on the DB and serve common requests quicker.  Cloud Logging aggregates the application and request/health check logs, providing a powerful search interface. Alerts can be set up for both metrics and logs.  There's a lot to work with here.
+
+## Final thoughts
+Ultimately this is a project that can potentially go on ad infintum, constantly adding more features, monitoring, and production-hardening.  It also needs a CI/CD system for testing and deployments, which I did not have the time to implement here.
+
+However, when trying to implement everything at once, it becomes easy to get lost, resulting in a lot of work expended on premature optimization and personal rabbit-holes that lead to dead-ends.  It is better to start with simple solutions, and to gradually improve upon them in incremental steps.
+
+I wanted to save time and deliver a robust solution using pre-baked technology, but I ended up spending more time trying to fix bugs than I might have by implementing something simpler first.
+
+## Author
+Garrett Anderson <garrett@devnull.rip>
