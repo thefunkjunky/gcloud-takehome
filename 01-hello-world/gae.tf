@@ -68,7 +68,7 @@ resource "google_app_engine_standard_app_version" "helloworld" {
 
     env_variables = {
       PORT = "8080",
-      # Forces an resource update when the zip object has been updated
+      # Forces a resource update when the zip object has been updated
       ZIP_MD5 = google_storage_bucket_object.helloworld_zip.md5hash
     }
 
