@@ -26,11 +26,12 @@ resource "google_app_engine_standard_app_version" "default" {
     project                   = local.project_id
     runtime                   = var.runtime
     service                   = "default"
+    version_id                = "init"
 
     entrypoint {
     shell = "gunicorn -b :$PORT main:app"
   }
-  
+
   env_variables = {
     PORT = "8080"
   }
@@ -41,6 +42,11 @@ resource "google_app_engine_standard_app_version" "default" {
       source_url = "https://storage.googleapis.com/${google_storage_bucket.gae-helloworld.name}/${google_storage_bucket_object.helloworld_zip.name}"
     }
   }
+
+  lifecycle {
+   prevent_destroy = true
+ }
+
 }
 
 resource "google_app_engine_standard_app_version" "helloworld" {

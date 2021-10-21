@@ -9,7 +9,7 @@ terraform {
   
   backend "gcs" {
     # bucket = "${var.project_id}-tfstate"
-    bucket = "idme-takehome003-tfstate"
+    bucket = "idme-takehome004-tfstate"
     prefix = "backend/terraform.tfstate"
   }
 }
