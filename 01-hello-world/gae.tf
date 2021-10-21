@@ -66,7 +66,8 @@ resource "google_app_engine_standard_app_version" "helloworld" {
   }
 
     env_variables = {
-      PORT = "8080"
+      PORT = "8080",
+      ZIP_MD5 = google_storage_bucket_object.helloworld_zip.md5hash
     }
 
   depends_on = [
@@ -75,7 +76,7 @@ resource "google_app_engine_standard_app_version" "helloworld" {
 
   deployment {
     zip {
-      source_url = "https://storage.googleapis.com/${google_storage_bucket.gae-helloworld.name}/${google_storage_bucket_object.helloworld_zip.name}"
+      source_url = "https://storage.googleapis.com/${google_storage_bucket.gae-helloworld.name}/${google_storage_bucket_object.helloworld_zip.output_name}"
     }
   }
 }

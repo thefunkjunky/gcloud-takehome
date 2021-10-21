@@ -1,5 +1,4 @@
-
-#
+###
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -45,7 +44,7 @@ def db_message(greeting):
 def hello():
     """Return a friendly HTTP greeting."""
     message = db_message("Hello World!")
-    html = f"<h>message:</h><p>{message}"
+    html = f"<h>Message:</h><p>{message}"
     return html
 
 
