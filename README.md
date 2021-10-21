@@ -53,4 +53,10 @@ The DB only really needs to be written to once, and must be production hardened 
 
 First thing's first, I need to create a state backend for the Terraform, and create the project resource.  In my experience, it is important to keep this separate from other parts of the terraform, so they were given their own folder, `00-backend`. Placing it together with other resources creates issues when trying to tear down other environments and configurations, since it will also try to tear down the bucket it is storing the state in.
 
+This was my first time using Terraform with GCP, and there were some challenges here. Notably, there's a chicken and egg problem when using a GCS state backend.  The Terraform needs to create the project the bucket will reside in first, without using backend state. Then the user needs to set their gcloud project to the new project, authenticate using their default application credentials, create the state bucket, then update the config to use the backend bucket, and export the local state to the remote backend.  I attempted to write a `bootstrap.sh` script to handle all of this.
+
+First set the variables in `terraform.tfvars`, and double check to make sure your org ID and billing account name are correct.  Then, execute `bootstrap.sh`. Part of it will require you to authenticate your Google account, please do so.  If you run into errors and need to start over, you may need to delete any remaining `*.tfstate*` files and the `.terraform` directory first.
+
+Ensure that it runs successfully and outputs the `project` resource.  This is required for the other Terraform resources.  They will also use the project_id set here, so you won't have to change it in multiple places.
+
 ## Problems
