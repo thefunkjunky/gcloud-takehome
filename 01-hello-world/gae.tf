@@ -19,6 +19,7 @@ resource "google_app_engine_application" "helloworld" {
 }
 
 resource "google_app_engine_standard_app_version" "default" {
+  # Don't mess around with this, causes issues when updating/deleting.
     delete_service_on_destroy = false
     instance_class            = var.instance_class
     project                   = local.project_id
@@ -67,6 +68,7 @@ resource "google_app_engine_standard_app_version" "helloworld" {
 
     env_variables = {
       PORT = "8080",
+      # Forces an resource update when the zip object has been updated
       ZIP_MD5 = google_storage_bucket_object.helloworld_zip.md5hash
     }
 
