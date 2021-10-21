@@ -82,13 +82,15 @@ I tried to get around this by creating a separate resource for the default servi
 
 Furthermore, most of the issues appear to either be transient in nature, and go away on subsequent runs of the terraform code, or require that the app be deployed once using the gcloud command line tool to "set up" whatever needs to be initialized on the backend.
 
-To deploy the GAE Terraform, execute the `bootstrap.sh` script in the `01-hello-world` directory.  This should be working now, but I can't run any more tests on it until my quota increase for projects on my billing account is granted, so I have to present it as-is for now.
+To deploy the GAE Terraform, execute the `bootstrap.sh` script in the `01-hello-world` directory.  This should be working now, but I can't run any more tests on it because I've run out of my projects quota, so I have to present it as-is for now.
 
 If you see errors when applying the terraform here, try waiting 5-10 minutes after creation of the `google_app_engine_application.helloworld` resource and applying the terraform again.  If this doesn't work, try running:
 ```bash
 gcloud app deploy --version init
 ```
-in the `app` directory, which seems to fix many of the transient issues, and subsequent runs of the terraform should work.  Not ideal, but I'm at the point where I would be reaching out to GCloud support to better understand what the problem is, or potentially abandoning this approach and starting over with GKE, or something else more simple and direct.
+in the `app` directory, which seems to fix many of the transient issues, and subsequent runs of the terraform should work.
+
+Once the terraform has been deployed, you may test the app by clicking on the "helloworld" service in your project's App Engine dashboard.  It's possible to assign the service a more idiomatic url based on a domain you control, but that is beyond the scope of this assignment.
 
 
 ## Monitoring
