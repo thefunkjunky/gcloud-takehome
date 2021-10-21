@@ -45,7 +45,7 @@ def db_message(greeting):
 def hello():
     """Return a friendly HTTP greeting."""
     message = db_message("Hello World!")
-    html = f"<h>message:</h<><p>{message}"
+    html = f"<h>message:</h><p>{message}"
     return html
 
 
