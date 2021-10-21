@@ -71,15 +71,18 @@ Before we get into the terraform for the application, we need to write the appli
 
 ### Terraform/GAE Problems
 
-Although there are terraform resources available for managing GAE and deploying the application code to new services/versions, in practice it doesn't work very well.
+Although there are terraform resources available for managing GAE and deploying the application code to new services/versions, in practice it is very error-prone.
 
-To start, there are rules for GAE that aren't conducive to Terraform IaC.  Namely, there can only be one `google_app_engine_application` per project, and once created, it cannot be deleted (you have to delete the entire project). Second, no service can be created without first deploying the `default` service, which also can't be deleted. Third, the oldest version for each service also can't be removed, which terraform will try to do if certain changes are made to the version resource.
+To start, there are rules for GAE that aren't conducive to Terraform IaC:  
+1. There can only be one `google_app_engine_application` per project, and once created, it cannot be deleted (you have to delete the entire project).
+1. No service can be created without deploying the `default` service first, which also can't be deleted.
+1. The oldest version for each service also can't be removed, which terraform will try to do if certain changes are made to the version resource.
 
 I tried to get around this by creating a separate resource for the default service, and another resource for a user-managed `helloworld` service, which depends on the `default` service being created first.  In theory this should work, but I experienced a host of different issues and errors when running it for the first time.  Many of the API errors aren't clear about what the problem is, and I eventually figured out that the real error messages are hidden in Cloud Build and Cloud Logging for the "behind the scenes" build and deployment steps.
 
-Furthermore, most of the issues appear to either be transient in nature and go away on subsequent runs of the terraform code, or require that the app be deployed once using the gcloud command line tool to "set up" whatever needs to be initialized on the backend.
+Furthermore, most of the issues appear to either be transient in nature, and go away on subsequent runs of the terraform code, or require that the app be deployed once using the gcloud command line tool to "set up" whatever needs to be initialized on the backend.
 
-To deploy the GAE Terraform, execute the `bootstrap.sh` script in the `01-hello-world` directory.  This should be working now, but I can't run any more tests on it until my quota increase for projects on my billing account is granted.
+To deploy the GAE Terraform, execute the `bootstrap.sh` script in the `01-hello-world` directory.  This should be working now, but I can't run any more tests on it until my quota increase for projects on my billing account is granted, so I have to present it as-is for now.
 
 If you see errors when applying the terraform here, try waiting 5-10 minutes after creation of the `google_app_engine_application.helloworld` resource and applying the terraform again.  If this doesn't work, try running:
 ```bash
