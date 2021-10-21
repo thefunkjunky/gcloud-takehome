@@ -79,13 +79,14 @@ I tried to get around this by creating a separate resource for the default servi
 
 Furthermore, most of the issues appear to either be transient in nature and go away on subsequent runs of the terraform code, or require that the app be deployed once using the gcloud command line tool to "set up" whatever needs to be initialized on the backend.
 
-If you see errors when applying the terraform here, waiting 5-10 minutes after creation of the `google_app_engine_application.helloworld` resource and running:
+To deploy the GAE Terraform, execute the `bootstrap.sh` script in the `01-hello-world` directory.  This should be working now, but I can't run any more tests on it until my quota increase for projects on my billing account is granted.
+
+If you see errors when applying the terraform here, try waiting 5-10 minutes after creation of the `google_app_engine_application.helloworld` resource and applying the terraform again.  If this doesn't work, try running:
 ```bash
 gcloud app deploy --version init
 ```
-in the `app` directory seems to fix many of the transient issues, and subsequent runs of the terraform will work.  Not ideal, but I'm at the point where I would be reaching out to GCloud support to better understand what the problem is, or potentially abandoning this approach and starting over with GKE, or something else more simple and direct.
+in the `app` directory, which seems to fix many of the transient issues, and subsequent runs of the terraform should work.  Not ideal, but I'm at the point where I would be reaching out to GCloud support to better understand what the problem is, or potentially abandoning this approach and starting over with GKE, or something else more simple and direct.
 
-There's probably a way to make this work in one go using terraform, but I'm afraid I might burn through a lot more time that could just lead to more dead-ends.  I was advised not to start over, so I'm presenting the project as-is, with the hope that we can discuss these issues in person. 
 
 ## Monitoring
 The good news is that once the app has been deployed, a world of monitoring metrics are ready to go.  They can be viewed in the Cloud Monitoring tool, and provide access to common metrics like CPU and Memory usage (good for spotting load or memory leaks), but also other really useful metrics like http response codes, and request latency, which is probably the most useful of the bunch.
@@ -97,7 +98,7 @@ Ultimately this is a project that can potentially go on ad infintum, constantly 
 
 However, when trying to implement everything at once, it becomes easy to get lost, resulting in a lot of work expended on premature optimization and personal rabbit-holes that lead to dead-ends.  It is better to start with simple solutions, and to gradually improve upon them in incremental steps.
 
-I wanted to save time and deliver a robust solution using pre-baked technology, but I ended up spending more time trying to fix bugs than I might have by implementing something simpler first.  I would consider something with more direct control, like GCE or GKE, before migrating to a serverless option.
+I wanted to save time and deliver a robust solution using pre-baked technology, but I ended up spending more time trying to fix obscure bugs.  Next time I would consider something with more direct control, like GCE or GKE, before migrating to a serverless option.
 
 
 ## Author

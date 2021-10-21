@@ -20,9 +20,7 @@ resource "google_app_engine_application" "helloworld" {
 
 resource "google_app_engine_standard_app_version" "default" {
     delete_service_on_destroy = false
-    inbound_services          = []
     instance_class            = var.instance_class
-    # noop_on_destroy           = false
     project                   = local.project_id
     runtime                   = var.runtime
     service                   = "default"
@@ -47,13 +45,17 @@ resource "google_app_engine_standard_app_version" "default" {
    prevent_destroy = true
  }
 
+ depends_on = [
+    google_project_service.apis,
+    google_storage_bucket.gae-helloworld
+  ]
+
+
 }
 
 resource "google_app_engine_standard_app_version" "helloworld" {
-    delete_service_on_destroy = false
-    inbound_services          = []
+    delete_service_on_destroy = true
     instance_class            = var.instance_class
-    # noop_on_destroy           = false
     project                   = local.project_id
     runtime                   = var.runtime
     service                   = var.service

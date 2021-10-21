@@ -4,7 +4,8 @@ locals {
     "appengine.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "firestore.googleapis.com",
-    "storage.googleapis.com"
+    "storage.googleapis.com",
+    "containerregistry.googleapis.com"
   ]
 }
 

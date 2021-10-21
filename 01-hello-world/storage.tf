@@ -16,9 +16,3 @@ resource "google_storage_bucket" "gae-helloworld" {
     }
   }
 }
-
-# resource "google_storage_bucket_access_control" "gae-helloworld" {
-#   bucket = google_storage_bucket.gae-helloworld.name
-#   role   = "WRITER"
-#   entity = "allUsers"
-# }
