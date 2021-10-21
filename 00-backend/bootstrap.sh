@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Uses brew-install gnuutils prefixed with an extra "g". Fix if necessary.
+# Uses brew-installed gnuutils prefixed with an extra "g". Fix if necessary.
 PROJECT=$(ggrep project_id terraform.tfvars | ggrep -Po '"\K[^"\047]+(?=["\047])')
 BUCKET=$PROJECT-tfstate
 export BUCKET
