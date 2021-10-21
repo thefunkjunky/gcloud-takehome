@@ -29,6 +29,8 @@ I had the following potential strategies in mind:
 
 * Flask/NGINX web application run on GCE instances, autoscaled in instance groups, using cloud load balancing.  This requires more setup as there's a whole OS and VM to deal with, which have to be configured via configuration management, or I have to build and deploy an image. Scaling is slow and based on simpler metrics like CPU and Memory. Networking is something I have to manage. Not as many metrics or logs available, unless I roll my own solutions.  Upside is that I have more control over my infrastructure, although nothing in the requirements demands this level of customization.  A lot of work for less performance and features, I'll pass.
 
+* Build Flask app in a docker container and deploy it to Cloud Run.  This is one of Google's serverless options that will run docker containers.  Might be a good option, but I'm unfamiliar with it, and learning it might be a time sink.
+
 * Google App Engine (standard/flex). Google Cloud's oldest product, this is their flagship web application platform.  Standard is designed to use extremeley light runtime environments for your code on automatically scaled workers.  It is extremeley fast and designed for large and unpredictable scaling needs.  It can also scale down to 0 workers, making it affordable for me.  It comes pre-baked with log aggregation (cloud logging), lots of useful metrics (cloud monitoring), cloud trace, cloud debugger, a NoSQL document store, caching, and a lot of other features.  Flex engine allows one to easily deploy their own images and runtimes, but is designed for more steady usage patterns.  I don't need anything that isn't already offered in the standard runtime, so I'm leaning toward that.  It seems like the most features offered, and the most production ready, with the smallest amount of effort required.  The downside is that it is a heavily managed service, offering less control over the backend.  It is also very unique, requiring more learning investment, and is less portable.
 
 * Flask app on GKE - The heaviest weight option here. Great for managing a complex array of services on scaled infrastructure.  Offers all kinds of abilities and services, but a complex endeavor to manage. I believe GCloud offers a package that helps it integrate into cloud monitoring and logging, although one can also run Prometheus, Grafana, etc.  Requires container images to be built and deployed via cloud build/container registry. There's only really one simple service that I'm running, and getting this to production readiness requires a lot more time and moving parts.  I believe that this is overkill for such a simple app, and the extra moving parts just means more things that can go wrong. Also, it's easy to accidentally incur costs using it, since it requires running nodes.  However, I have a nagging suspicion that this may be the better option, since it is more portable, better supported in the community, and offers more control.
@@ -83,7 +85,7 @@ gcloud app deploy --version init
 ```
 in the `app` directory seems to fix many of the transient issues, and subsequent runs of the terraform will work.  Not ideal, but I'm at the point where I would be reaching out to GCloud support to better understand what the problem is, or potentially abandoning this approach and starting over with GKE, or something else more simple and direct.
 
-There's probably a way to make this work in one go using terraform, but I'm afraid I might burn through a lot more time that I could have used to just do something different.  I was advised not to start over, so I'm presenting the project as-is, with the hope that we can discuss these issues in person. 
+There's probably a way to make this work in one go using terraform, but I'm afraid I might burn through a lot more time that could just lead to more dead-ends.  I was advised not to start over, so I'm presenting the project as-is, with the hope that we can discuss these issues in person. 
 
 ## Monitoring
 The good news is that once the app has been deployed, a world of monitoring metrics are ready to go.  They can be viewed in the Cloud Monitoring tool, and provide access to common metrics like CPU and Memory usage (good for spotting load or memory leaks), but also other really useful metrics like http response codes, and request latency, which is probably the most useful of the bunch.
@@ -95,7 +97,8 @@ Ultimately this is a project that can potentially go on ad infintum, constantly 
 
 However, when trying to implement everything at once, it becomes easy to get lost, resulting in a lot of work expended on premature optimization and personal rabbit-holes that lead to dead-ends.  It is better to start with simple solutions, and to gradually improve upon them in incremental steps.
 
-I wanted to save time and deliver a robust solution using pre-baked technology, but I ended up spending more time trying to fix bugs than I might have by implementing something simpler first.
+I wanted to save time and deliver a robust solution using pre-baked technology, but I ended up spending more time trying to fix bugs than I might have by implementing something simpler first.  I would consider something with more direct control, like GCE or GKE, before migrating to a serverless option.
+
 
 ## Author
 Garrett Anderson <garrett@devnull.rip>
