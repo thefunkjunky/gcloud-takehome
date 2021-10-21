@@ -12,6 +12,9 @@
 # tf lock files
 *.lock.hcl
 
+# tf config.tf
+config.tf
+
 # Crash log files
 crash.log
 
