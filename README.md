@@ -19,7 +19,7 @@ The following were options I considered for the implementation details:
 
 Just about any language with a web framework will work here. There aren't any usage requirements that demand special features of any language in particular, so I opted for Python3, the language I'm most familiar with.  It also has a long history of support on Google Cloud runtimes and client libraries, so it is reasonable to assume it has wide product and feature coverage.
 
-The downside to Python is that it is slower than other languages, and requires larger container runtime sizes due to its requirements for an OS.  Golang would be a good choice, as it is not only fast and lightweight, but provides a good web framework and other libraries natively. But, I don't know it, and the benefits aren't worth the time spent trying to learn it here. 
+The downside to Python is that it is slower than other languages, and requires larger container runtime sizes due to its requirements for an OS.  Golang would be a good alternative choice, as it is not only fast and lightweight, but provides a good web framework and other libraries natively. But, I don't know it, and the benefits aren't worth the time spent trying to learn it here. 
 
 ### App Infrastructure
 
@@ -29,7 +29,7 @@ I had the following potential strategies in mind:
 
 * Flask/NGINX web application run on GCE instances, autoscaled in instance groups, using cloud load balancing.  This requires more setup as there's a whole OS and VM to deal with, which have to be configured via configuration management, or I have to build and deploy an image. Scaling is slow and based on simpler metrics like CPU and Memory. Networking is something I have to manage. Not as many metrics or logs available, unless I roll my own solutions.  Upside is that I have more control over my infrastructure, although nothing in the requirements demands this level of customization.  A lot of work for less performance and features, I'll pass.
 
-* Build Flask app in a docker container and deploy it to Cloud Run.  This is one of Google's serverless options that will run docker containers.  Might be a good option, but I'm unfamiliar with it, and learning it might be a time sink.
+* Build Flask app in a docker container and deploy it to Cloud Run.  This is one of Google's serverless options that will run docker containers.  Might be a good option, but I'm unfamiliar with it, and learning it is likely to be a time sink.
 
 * Google App Engine (standard/flex). Google Cloud's oldest product, this is their flagship web application platform.  Standard is designed to use extremeley light runtime environments for your code on automatically scaled workers.  It is extremeley fast and designed for large and unpredictable scaling needs.  It can also scale down to 0 workers, making it affordable for me.  It comes pre-baked with log aggregation (cloud logging), lots of useful metrics (cloud monitoring), cloud trace, cloud debugger, a NoSQL document store, caching, and a lot of other features.  Flex engine allows one to easily deploy their own images and runtimes, but is designed for more steady usage patterns.  I don't need anything that isn't already offered in the standard runtime, so I'm leaning toward that.  It seems like the most features offered, and the most production ready, with the smallest amount of effort required.  The downside is that it is a heavily managed service, offering less control over the backend.  It is also very unique, requiring more learning investment, and is less portable.
 
